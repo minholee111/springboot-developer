@@ -1,0 +1,3 @@
+INSERT INTO MEMBER (id, name) VALUES (1, 'mhlee');
+INSERT INTO MEMBER (id, name) VALUES (2, 'HOLY');
+INSERT INTO MEMBER (id, name) VALUES (3, 'MOLY');
