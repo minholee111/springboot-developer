@@ -66,22 +66,87 @@ class MemberRepositoryTest {
         assertThat(member.getName()).isEqualTo("HOLY");
     }
 
+    @DisplayName("MemberRepository를 통해 이름이 '이민호'인 레코드 추가하기")
+    @Test
+    @Sql(statements = {
+            "DELETE FROM MEMBER",
+            "ALTER TABLE MEMBER ALTER COLUMN id RESTART WITH 1"
+    })
+    public void saveMember() {
+        // 준비 given : Member 객체 생성
+        Member member = new Member("이민호");
 
+        // 실행
+        memberRepository.save(member);
 
-        @DisplayName("MemberRepository를 통해 이름이 '이민호'인 레코드 추가하기")
-        @Test
-        public void saveMember(){
-            // 준비 given : Member 객체 생성
-            Member member = new Member("이민호");
+        // 검증
+        List<Member> result = memberRepository.findAll();
+        assertThat(result.size()).isEqualTo(1);
+        assertThat(result.get(0).getName()).isEqualTo("이민호");
+    }
 
+    @DisplayName("테이블 member에서 id가 3인 레코드 삭제하기")
+    @Test
+    public void deleteById3() {
+        // 준비 given
 
-            // 실행
-            memberRepository.save(member);
-            //검증
-            //member 테이블에서 모든 레코드를 select 했을 때 레코드의 수가 1이고
-            // 그 레코드의 모든 칼럼 값이 '이민호'인지 확인
-            List<Member> result = memberRepository.findAll();
-            assertThat(result.size()).isEqualTo(1);
-            assertThat(result.get(0).getName()).isEqualTo("이민호");
-        }
+        // 실행
+        memberRepository.deleteById(3L);
+
+        // 검증
+        List<Member> members = memberRepository.findAll();
+        assertThat(members.size()).isEqualTo(2);
+    }
+
+    @Sql("/insert-member.sql")
+    @DisplayName("테이블 member의 모든 레코드 삭제하기")
+    @Test
+    public void deleteAll() {
+        // 준비 given
+        List<Member> member = memberRepository.findAll();
+        assertThat(member.size()).isEqualTo(3);
+
+        // 실행
+        memberRepository.deleteAll();
+
+        // 검증
+        List<Member> members = memberRepository.findAll();
+        assertThat(members.size()).isEqualTo(0);
+    }
+
+    @Sql(statements = {
+            "DELETE FROM MEMBER",
+            "ALTER TABLE MEMBER ALTER COLUMN id RESTART WITH 1"
+    })
+    @DisplayName("테이블 member에 name이 'A', 'B'인 레코드를 한 번에 삽입하기")
+    @Test
+    public void SaveMembers() {
+
+        // 준비 given
+        // 두 개의 Member 객체를 생성해서 List에 넣는다.
+        List<Member> members = List.of(new Member("A"), new Member("B"));
+
+        // 실행 when
+        memberRepository.saveAll(members);
+
+        // 검증 then
+        // 테이블에서 모든 레코드를 select 했더니 개수가 2개임을 검증
+        members = memberRepository.findAll();
+        assertThat(members.size()).isEqualTo(2);
+    }
+
+    @Sql("/insert-member.sql")
+    @DisplayName("변경감지 기능을 통해 Id가 2인 레코드의 이름을 'HOLY'에서 'BB'로 변경하기")
+    @Test
+    public void update() {
+        // 준비 given
+        Member member = memberRepository.findById(2L).get();
+
+        // 실행
+        member.setName("BB");
+
+        // 검증
+        member = memberRepository.findById(2L).get();
+        assertThat(member.getName()).isEqualTo("BB");
+    }
 }
